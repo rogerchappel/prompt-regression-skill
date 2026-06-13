@@ -1,0 +1,11 @@
+[
+  {
+    "name": "clean-followup",
+    "output": "Thanks for the context. I will verify the next step and keep the follow-up concise.",
+    "expect": {
+      "required": ["next step", "concise"],
+      "forbidden": ["guarantee"],
+      "tone": "calm"
+    }
+  }
+]

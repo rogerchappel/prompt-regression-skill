@@ -1,0 +1,32 @@
+{
+  "cases": [
+    {
+      "name": "followup-draft",
+      "output": "Thanks for the context. I will draft a concise follow-up and flag any risk for review.",
+      "expect": {
+        "required": ["concise follow-up"],
+        "forbidden": ["guarantee"],
+        "tone": "calm"
+      }
+    },
+    {
+      "name": "overclaim",
+      "output": "This will guarantee the customer accepts the proposal.",
+      "expect": {
+        "required": ["proposal"],
+        "forbidden": ["guarantee"],
+        "tone": "cautious"
+      }
+    },
+    {
+      "name": "missing-action",
+      "output": "The answer is friendly and short.",
+      "expect": {
+        "required": ["next step"],
+        "forbidden": ["as an ai"],
+        "tone": "direct"
+      },
+      "notes": ["Needs an explicit action for the user."]
+    }
+  ]
+}
