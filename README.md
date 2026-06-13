@@ -1,6 +1,6 @@
 # prompt-regression-skill
 
-`prompt-regression-skill` is a local-first agent skill for checking prompt-output regressions from JSON fixture cases. It does not call a model. Instead, it evaluates saved outputs against required phrases, forbidden phrases, expected tone labels, and reviewer notes so an agent can catch obvious breakage before a prompt PR.
+`prompt-regression-skill` is a local-first agent skill for checking prompt-output regressions from JSON fixture cases. It does not call a model. Instead, it evaluates saved outputs against required phrases, forbidden phrases, expected tone labels, reviewer notes, and aggregate risk so an agent can catch obvious breakage before a prompt PR.
 
 ## Quickstart
 
