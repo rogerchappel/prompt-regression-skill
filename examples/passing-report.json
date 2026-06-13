@@ -1,0 +1,14 @@
+{
+  "total": 1,
+  "passed": 1,
+  "failed": 0,
+  "status": "pass",
+  "riskLevel": "low",
+  "results": [
+    {
+      "name": "clean-followup",
+      "status": "pass",
+      "findings": ["all deterministic checks passed"]
+    }
+  ]
+}
