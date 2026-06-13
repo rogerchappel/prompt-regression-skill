@@ -39,6 +39,7 @@ export function renderReport(report, format = "text") {
     "# Prompt Regression Report",
     "",
     `Status: ${report.status}`,
+    `Risk: ${report.riskLevel}`,
     `Cases: ${report.total}`,
     `Passed: ${report.passed}`,
     `Failed: ${report.failed}`,

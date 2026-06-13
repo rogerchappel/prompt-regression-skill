@@ -26,6 +26,6 @@ test("renders json and text reports", () => {
       notes: []
     }
   ]);
-  assert.match(renderReport(report, "text"), /Prompt Regression Report/);
+  assert.match(renderReport(report, "text"), /Risk: low/);
   assert.equal(JSON.parse(renderReport(report, "json")).status, "pass");
 });
