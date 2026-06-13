@@ -14,6 +14,7 @@ test("evaluates pass and fail cases", () => {
   assert.equal(report.passed, 1);
   assert.equal(report.failed, 2);
   assert.equal(report.status, "fail");
+  assert.equal(report.riskLevel, "high");
 });
 
 test("renders json and text reports", () => {

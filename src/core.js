@@ -25,6 +25,7 @@ export function evaluateCases(cases) {
     passed,
     failed,
     status: failed === 0 ? "pass" : "fail",
+    riskLevel: failed === 0 ? "low" : failed === 1 ? "medium" : "high",
     results,
     recommendations: buildRecommendations(results)
   };
