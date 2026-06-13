@@ -1,0 +1,33 @@
+{
+  "name": "prompt-regression-skill",
+  "version": "0.1.0",
+  "description": "Local-first agent skill for checking prompt-output regressions from fixture cases.",
+  "type": "module",
+  "bin": {
+    "prompt-regression-skill": "./bin/prompt-regression-skill.js"
+  },
+  "scripts": {
+    "check": "node --check src/core.js && node --check bin/prompt-regression-skill.js",
+    "test": "node --test",
+    "smoke": "node bin/prompt-regression-skill.js fixtures/pass-cases.json --format text",
+    "demo:failures": "node bin/prompt-regression-skill.js fixtures/cases.json --format text"
+  },
+  "keywords": [
+    "agent-skill",
+    "prompt",
+    "regression",
+    "evals"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "bin",
+    "docs",
+    "fixtures",
+    "src",
+    "SKILL.md",
+    "README.md"
+  ]
+}
