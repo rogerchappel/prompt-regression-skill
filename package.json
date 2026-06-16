@@ -10,7 +10,9 @@
     "check": "node --check src/core.js && node --check bin/prompt-regression-skill.js",
     "test": "node --test",
     "smoke": "node bin/prompt-regression-skill.js fixtures/pass-cases.json --format text",
-    "demo:failures": "node bin/prompt-regression-skill.js fixtures/cases.json --format text"
+    "demo:failures": "node bin/prompt-regression-skill.js fixtures/cases.json --format text",
+    "package:smoke": "npm pack --dry-run",
+    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
   },
   "keywords": [
     "agent-skill",
@@ -19,6 +21,14 @@
     "evals"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerchappel/prompt-regression-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rogerchappel/prompt-regression-skill/issues"
+  },
+  "homepage": "https://github.com/rogerchappel/prompt-regression-skill#readme",
   "engines": {
     "node": ">=20"
   },

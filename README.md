@@ -35,4 +35,8 @@ npm run check
 npm test
 npm run smoke
 npm run demo:failures
+npm run package:smoke
+npm run release:check
 ```
+
+Use `npm run release:check` before publishing or opening a release PR.
