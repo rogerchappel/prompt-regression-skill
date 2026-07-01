@@ -11,7 +11,7 @@
     "test": "node --test",
     "smoke": "node bin/prompt-regression-skill.js fixtures/pass-cases.json --format text",
     "demo:failures": "node bin/prompt-regression-skill.js fixtures/cases.json --format text",
-    "package:smoke": "npm pack --dry-run",
+    "package:smoke": "node scripts/package-smoke.mjs",
     "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
   },
   "keywords": [
@@ -34,6 +34,7 @@
   },
   "files": [
     "bin",
+    "scripts",
     "docs",
     "fixtures",
     "src",

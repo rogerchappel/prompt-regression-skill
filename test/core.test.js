@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { evaluateCases, loadCases, renderReport } from "../src/core.js";
 
 test("loads fixture cases", () => {
@@ -28,4 +30,14 @@ test("renders json and text reports", () => {
   ]);
   assert.match(renderReport(report, "text"), /Risk: low/);
   assert.equal(JSON.parse(renderReport(report, "json")).status, "pass");
+});
+
+test("CLI prints package version", () => {
+  const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+  const result = spawnSync(process.execPath, ["bin/prompt-regression-skill.js", "--version"], {
+    encoding: "utf8"
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stdout.trim(), pkg.version);
 });

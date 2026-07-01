@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import { evaluateCases, loadCases, renderReport } from "../src/core.js";
 
 const args = process.argv.slice(2);
@@ -6,6 +7,14 @@ const args = process.argv.slice(2);
 if (args.includes("--help") || args.length === 0) {
   console.log("Usage: prompt-regression-skill <cases.json> [--format text|json]");
   process.exit(args.length === 0 ? 1 : 0);
+}
+
+if (args.includes("--version") || args.includes("-v")) {
+  const packageJson = JSON.parse(
+    readFileSync(new URL("../package.json", import.meta.url), "utf8")
+  );
+  console.log(packageJson.version);
+  process.exit(0);
 }
 
 try {
