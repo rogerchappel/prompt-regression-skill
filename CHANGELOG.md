@@ -9,6 +9,8 @@ format and uses semantic versioning when versioned releases are published.
 
 ### Added
 
+- Content-aware package smoke and installed-tarball smoke checks for the CLI
+  release path.
 - Initial release-candidate surface for local prompt-output regression checks.
 - Fixture-backed check, test, smoke, package dry-run, and release-check scripts.
 - Review guidance and case-schema docs for deterministic prompt fixture review.

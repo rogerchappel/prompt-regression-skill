@@ -36,7 +36,11 @@ npm test
 npm run smoke
 npm run demo:failures
 npm run package:smoke
+npm run install:smoke
 npm run release:check
 ```
 
 Use `npm run release:check` before publishing or opening a release PR.
+`npm run package:smoke` verifies the packed files, executable bin metadata, and
+JSON output shape. `npm run install:smoke` installs the tarball in a temporary
+project and runs the installed `prompt-regression-skill --help` command.
