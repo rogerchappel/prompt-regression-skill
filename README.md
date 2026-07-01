@@ -8,6 +8,8 @@
 npm install
 npm run smoke
 node bin/prompt-regression-skill.js fixtures/cases.json --format json
+node bin/prompt-regression-skill.js --help
+node bin/prompt-regression-skill.js --version
 ```
 
 ## Case Format
@@ -40,3 +42,5 @@ npm run release:check
 ```
 
 Use `npm run release:check` before publishing or opening a release PR.
+`npm run package:smoke` verifies the dry-run tarball includes the executable
+CLI, source module, fixtures, docs, policies, and release notes.

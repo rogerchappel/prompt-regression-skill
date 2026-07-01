@@ -11,6 +11,8 @@ npm run check
 npm test
 npm run smoke
 npm run demo:failures
+npm run package:smoke
+npm run release:check
 ```
 
 `npm run demo:failures` intentionally exits non-zero because it demonstrates failing regression cases.
