@@ -12,6 +12,7 @@ const requiredFiles = [
   "fixtures/cases.json",
   "docs/CASE_SCHEMA.md",
   "docs/RELEASE_CANDIDATE.md",
+  "examples/passing-report.json",
   "SKILL.md",
   "README.md",
   "LICENSE",
@@ -64,4 +65,19 @@ if (version.stdout.trim() !== pkg.version) {
   process.exit(1);
 }
 
-console.log(`package smoke passed; checked ${requiredFiles.length} files, bin mode, and CLI version`);
+const report = spawnSync(process.execPath, [binPath, "fixtures/pass-cases.json", "--format", "json"], {
+  encoding: "utf8"
+});
+
+if (report.status !== 0) {
+  process.stderr.write(report.stderr);
+  process.exit(report.status || 1);
+}
+
+const parsedReport = JSON.parse(report.stdout);
+if (parsedReport.status !== "pass" || parsedReport.total !== 1) {
+  console.error("package smoke failed; CLI JSON output did not match the passing fixture");
+  process.exit(1);
+}
+
+console.log(`package smoke passed; checked ${requiredFiles.length} files, bin mode, CLI version, and JSON output`);

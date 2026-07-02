@@ -11,8 +11,9 @@
     "test": "node --test",
     "smoke": "node bin/prompt-regression-skill.js fixtures/pass-cases.json --format text",
     "demo:failures": "node bin/prompt-regression-skill.js fixtures/cases.json --format text",
+    "install:smoke": "node scripts/install-smoke.js",
     "package:smoke": "node scripts/package-smoke.mjs",
-    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
+    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke && npm run install:smoke"
   },
   "keywords": [
     "agent-skill",
@@ -36,6 +37,7 @@
     "bin",
     "scripts",
     "docs",
+    "examples",
     "fixtures",
     "src",
     "SKILL.md",
