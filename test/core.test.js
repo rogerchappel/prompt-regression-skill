@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { evaluateCases, loadCases, renderReport } from "../src/core.js";
 
 test("loads fixture cases", () => {
@@ -17,6 +19,54 @@ test("evaluates pass and fail cases", () => {
   assert.equal(report.failed, 2);
   assert.equal(report.status, "fail");
   assert.equal(report.riskLevel, "high");
+});
+
+test("loads array and object case containers", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "prompt-regression-cases-"));
+  const caseItem = { name: "valid", output: "hello" };
+
+  try {
+    for (const [name, contents] of [
+      ["array.json", [caseItem]],
+      ["object.json", { cases: [caseItem] }]
+    ]) {
+      const file = path.join(directory, name);
+      writeFileSync(file, JSON.stringify(contents));
+      assert.equal(loadCases(file)[0].name, "valid");
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("rejects empty suites through file and evaluation APIs", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "prompt-regression-empty-"));
+  const file = path.join(directory, "empty.json");
+  writeFileSync(file, '{"cases":[]}');
+
+  try {
+    assert.throws(() => loadCases(file), /must contain at least one case/);
+    assert.throws(() => evaluateCases([]), /must contain at least one case/);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("rejects malformed case fields with case-specific diagnostics", () => {
+  const valid = { name: "valid", output: "hello" };
+  const invalidCases = [
+    [{ output: "hello" }, /Case 1 field "name"/],
+    [{ name: "bad-output", output: 42 }, /Case 1 \(bad-output\) field "output"/],
+    [{ ...valid, expect: [] }, /Case 1 \(valid\) field "expect"/],
+    [{ ...valid, expect: { required: { phrase: "hello" } } }, /field "expect.required".*string or an array of strings/],
+    [{ ...valid, expect: { forbidden: ["fine", 42] } }, /field "expect.forbidden".*string or an array of strings/],
+    [{ ...valid, expect: { tone: false } }, /field "expect.tone".*non-empty string/],
+    [{ ...valid, notes: ["fine", {}] }, /field "notes".*string or an array of strings/]
+  ];
+
+  for (const [item, diagnostic] of invalidCases) {
+    assert.throws(() => evaluateCases([item]), diagnostic);
+  }
 });
 
 test("renders json and text reports", () => {
@@ -40,4 +90,21 @@ test("CLI prints package version", () => {
 
   assert.equal(result.status, 0, result.stderr);
   assert.equal(result.stdout.trim(), pkg.version);
+});
+
+test("CLI rejects an empty suite with a diagnostic and nonzero exit", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "prompt-regression-cli-"));
+  const file = path.join(directory, "empty.json");
+  writeFileSync(file, "[]");
+
+  try {
+    const result = spawnSync(process.execPath, ["bin/prompt-regression-skill.js", file, "--format", "json"], {
+      encoding: "utf8"
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /must contain at least one case/);
+    assert.equal(result.stdout, "");
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 });
