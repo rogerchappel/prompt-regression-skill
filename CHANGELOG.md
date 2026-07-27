@@ -7,6 +7,11 @@ format and uses semantic versioning when versioned releases are published.
 
 ## [Unreleased]
 
+### Changed
+
+- Reject empty regression suites and malformed case fields instead of allowing
+  empty gates to pass or coercing invalid phrase values.
+
 ### Added
 
 - Content-aware package smoke and installed-tarball smoke checks for the CLI
