@@ -9,15 +9,19 @@ export function loadCases(filePath) {
   } catch (error) {
     throw new Error(`Could not read regression cases: ${error.message}`);
   }
-  const cases = Array.isArray(parsed) ? parsed : parsed.cases;
+  const cases = Array.isArray(parsed)
+    ? parsed
+    : parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? parsed.cases
+      : undefined;
   if (!Array.isArray(cases)) {
     throw new Error("Regression file must be an array or an object with a cases array");
   }
-  return cases.map(normalizeCase);
+  return normalizeCases(cases);
 }
 
 export function evaluateCases(cases) {
-  const results = cases.map(evaluateCase);
+  const results = normalizeCases(cases).map(evaluateCase);
   const passed = results.filter((result) => result.status === "pass").length;
   const failed = results.length - passed;
   return {
@@ -56,23 +60,40 @@ export function renderReport(report, format = "text") {
   return `${lines.join("\n")}\n`;
 }
 
+function normalizeCases(cases) {
+  if (!Array.isArray(cases)) {
+    throw new Error("Regression cases must be an array");
+  }
+  if (cases.length === 0) {
+    throw new Error("Regression cases must contain at least one case");
+  }
+  return cases.map(normalizeCase);
+}
+
 function normalizeCase(item, index) {
-  if (!item || typeof item !== "object") {
+  const label = `Case ${index + 1}`;
+  if (!isPlainObject(item)) {
     throw new Error(`Case ${index + 1} must be an object`);
   }
-  if (typeof item.output !== "string") {
-    throw new Error(`Case ${item.name || index + 1} must include an output string`);
+  if (typeof item.name !== "string" || item.name.trim() === "") {
+    throw new Error(`${label} field "name" must be a non-empty string`);
   }
-  const expect = item.expect || {};
+  if (typeof item.output !== "string") {
+    throw new Error(`${label} (${item.name}) field "output" must be a string`);
+  }
+  if (item.expect !== undefined && !isPlainObject(item.expect)) {
+    throw new Error(`${label} (${item.name}) field "expect" must be an object`);
+  }
+  const expect = item.expect ?? {};
   return {
-    name: item.name || `case-${index + 1}`,
+    name: item.name,
     output: item.output,
     expect: {
-      required: asStringArray(expect.required),
-      forbidden: asStringArray(expect.forbidden),
-      tone: expect.tone || null
+      required: asStringArray(expect.required, `${label} (${item.name}) field "expect.required"`),
+      forbidden: asStringArray(expect.forbidden, `${label} (${item.name}) field "expect.forbidden"`),
+      tone: optionalString(expect.tone, `${label} (${item.name}) field "expect.tone"`)
     },
-    notes: asStringArray(item.notes)
+    notes: asStringArray(item.notes, `${label} (${item.name}) field "notes"`)
   };
 }
 
@@ -130,8 +151,23 @@ function matchesTone(output, tone) {
   return (toneHints[tone] || [tone]).some((hint) => normalized.includes(hint));
 }
 
-function asStringArray(value) {
-  if (!value) return [];
-  if (Array.isArray(value)) return value.map(String);
-  return [String(value)];
+function asStringArray(value, field) {
+  if (value === undefined) return [];
+  const values = Array.isArray(value) ? value : [value];
+  if (values.some((item) => typeof item !== "string")) {
+    throw new Error(`${field} must be a string or an array of strings`);
+  }
+  return values;
+}
+
+function optionalString(value, field) {
+  if (value === undefined) return null;
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new Error(`${field} must be a non-empty string`);
+  }
+  return value;
+}
+
+function isPlainObject(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
