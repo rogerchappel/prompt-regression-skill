@@ -21,6 +21,20 @@ test("evaluates pass and fail cases", () => {
   assert.equal(report.riskLevel, "high");
 });
 
+test("evaluates loaded cases when every optional field is omitted", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "prompt-regression-optional-"));
+  const file = path.join(directory, "minimal.json");
+  writeFileSync(file, JSON.stringify([{ name: "minimal", output: "hello" }]));
+
+  try {
+    const report = evaluateCases(loadCases(file));
+    assert.equal(report.status, "pass");
+    assert.deepEqual(report.results[0].findings, ["all deterministic checks passed"]);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test("loads array and object case containers", () => {
   const directory = mkdtempSync(path.join(tmpdir(), "prompt-regression-cases-"));
   const caseItem = { name: "valid", output: "hello" };
@@ -59,7 +73,10 @@ test("rejects malformed case fields with case-specific diagnostics", () => {
     [{ name: "bad-output", output: 42 }, /Case 1 \(bad-output\) field "output"/],
     [{ ...valid, expect: [] }, /Case 1 \(valid\) field "expect"/],
     [{ ...valid, expect: { required: { phrase: "hello" } } }, /field "expect.required".*string or an array of strings/],
+    [{ ...valid, expect: { required: [""] } }, /field "expect.required".*non-empty strings/],
+    [{ ...valid, expect: { required: ["  "] } }, /field "expect.required".*non-empty strings/],
     [{ ...valid, expect: { forbidden: ["fine", 42] } }, /field "expect.forbidden".*string or an array of strings/],
+    [{ ...valid, expect: { forbidden: ["fine", "\t"] } }, /field "expect.forbidden".*non-empty strings/],
     [{ ...valid, expect: { tone: false } }, /field "expect.tone".*non-empty string/],
     [{ ...valid, notes: ["fine", {}] }, /field "notes".*string or an array of strings/]
   ];
@@ -67,6 +84,16 @@ test("rejects malformed case fields with case-specific diagnostics", () => {
   for (const [item, diagnostic] of invalidCases) {
     assert.throws(() => evaluateCases([item]), diagnostic);
   }
+});
+
+test("matches built-in tone hints only at token boundaries", () => {
+  const report = evaluateCases([
+    { name: "substring", output: "This cannot be approved.", expect: { tone: "calm" } },
+    { name: "token", output: "We can review this.", expect: { tone: "calm" } }
+  ]);
+
+  assert.equal(report.results[0].status, "fail");
+  assert.equal(report.results[1].status, "pass");
 });
 
 test("renders json and text reports", () => {
@@ -104,6 +131,22 @@ test("CLI rejects an empty suite with a diagnostic and nonzero exit", () => {
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /must contain at least one case/);
     assert.equal(result.stdout, "");
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("CLI evaluates a minimal case without optional fields", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "prompt-regression-cli-minimal-"));
+  const file = path.join(directory, "minimal.json");
+  writeFileSync(file, JSON.stringify([{ name: "minimal", output: "hello" }]));
+
+  try {
+    const result = spawnSync(process.execPath, ["bin/prompt-regression-skill.js", file, "--format", "json"], {
+      encoding: "utf8"
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(JSON.parse(result.stdout).status, "pass");
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
