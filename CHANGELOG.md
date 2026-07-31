@@ -11,6 +11,8 @@ format and uses semantic versioning when versioned releases are published.
 
 - Reject empty regression suites and malformed case fields instead of allowing
   empty gates to pass or coercing invalid phrase values.
+- Keep omitted optional fields valid across loader and evaluator boundaries,
+  reject blank phrase entries, and match built-in tone hints as complete tokens.
 
 ### Added
 
