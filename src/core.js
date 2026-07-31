@@ -85,14 +85,17 @@ function normalizeCase(item, index) {
     throw new Error(`${label} (${item.name}) field "expect" must be an object`);
   }
   const expect = item.expect ?? {};
+  const normalizedExpect = {
+    required: asStringArray(expect.required, `${label} (${item.name}) field "expect.required"`),
+    forbidden: asStringArray(expect.forbidden, `${label} (${item.name}) field "expect.forbidden"`)
+  };
+  const tone = optionalString(expect.tone, `${label} (${item.name}) field "expect.tone"`);
+  if (tone !== undefined) normalizedExpect.tone = tone;
+
   return {
     name: item.name,
     output: item.output,
-    expect: {
-      required: asStringArray(expect.required, `${label} (${item.name}) field "expect.required"`),
-      forbidden: asStringArray(expect.forbidden, `${label} (${item.name}) field "expect.forbidden"`),
-      tone: optionalString(expect.tone, `${label} (${item.name}) field "expect.tone"`)
-    },
+    expect: normalizedExpect,
     notes: asStringArray(item.notes, `${label} (${item.name}) field "notes"`)
   };
 }
@@ -148,7 +151,14 @@ function matchesTone(output, tone) {
     direct: ["do", "run", "check", "because"],
     cautious: ["may", "verify", "review", "risk"]
   };
-  return (toneHints[tone] || [tone]).some((hint) => normalized.includes(hint));
+  const hints = toneHints[tone];
+  if (!hints) return normalized.includes(normalize(tone));
+  return hints.some((hint) => containsToken(normalized, hint));
+}
+
+function containsToken(text, token) {
+  const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])`, "u").test(text);
 }
 
 function asStringArray(value, field) {
@@ -157,11 +167,14 @@ function asStringArray(value, field) {
   if (values.some((item) => typeof item !== "string")) {
     throw new Error(`${field} must be a string or an array of strings`);
   }
+  if (values.some((item) => item.trim() === "")) {
+    throw new Error(`${field} must contain non-empty strings`);
+  }
   return values;
 }
 
 function optionalString(value, field) {
-  if (value === undefined) return null;
+  if (value === undefined) return undefined;
   if (typeof value !== "string" || value.trim() === "") {
     throw new Error(`${field} must be a non-empty string`);
   }
