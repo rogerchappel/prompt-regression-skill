@@ -9,6 +9,8 @@ format and uses semantic versioning when versioned releases are published.
 
 ### Changed
 
+- Refresh CI to maintained checkout and Node setup actions, with read-only
+  repository-content permissions.
 - Reject empty regression suites and malformed case fields instead of allowing
   empty gates to pass or coercing invalid phrase values.
 - Keep omitted optional fields valid across loader and evaluator boundaries,
