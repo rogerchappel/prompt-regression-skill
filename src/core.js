@@ -152,8 +152,7 @@ function matchesTone(output, tone) {
     cautious: ["may", "verify", "review", "risk"]
   };
   const hints = toneHints[tone];
-  if (!hints) return normalized.includes(normalize(tone));
-  return hints.some((hint) => containsToken(normalized, hint));
+  return (hints || [tone]).some((hint) => containsToken(normalized, normalize(hint)));
 }
 
 function containsToken(text, token) {

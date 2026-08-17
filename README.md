@@ -17,6 +17,8 @@ node bin/prompt-regression-skill.js --version
 Case files accept either a non-empty JSON array or an object with a non-empty
 `cases` array. Invalid case fields produce a diagnostic and nonzero exit; see
 [`docs/CASE_SCHEMA.md`](docs/CASE_SCHEMA.md) for the validated schema.
+Tone hints match case-insensitively as complete Unicode tokens, including
+custom hints: `formal` matches `FORMAL!`, but not `informally`.
 
 ```json
 {
