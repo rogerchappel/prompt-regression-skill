@@ -21,8 +21,11 @@ Optional fields:
 
 Values are validated rather than coerced. The loader and CLI reject malformed
 containers, empty suites, missing required fields, empty or non-string phrase
-values, and non-string tone or note values. Built-in tone hints match complete
-tokens, so a hint such as `can` does not match the different word `cannot`.
+values, and non-string tone or note values. Tone matching is case-insensitive,
+and both built-in and custom hints must match complete Unicode letter, number,
+or underscore-delimited tokens. Thus `can` does not match `cannot`, and the
+custom hint `formal` does not match `informally`; punctuation may delimit a
+standalone match.
 CLI validation failures print a case- and field-specific diagnostic to stderr
 and exit nonzero without producing a report.
 
