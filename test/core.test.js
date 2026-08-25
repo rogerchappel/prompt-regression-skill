@@ -86,6 +86,42 @@ test("rejects malformed case fields with case-specific diagnostics", () => {
   }
 });
 
+test("rejects unsupported case and expectation keys through both APIs", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "prompt-regression-unknown-"));
+  const cases = [
+    { name: "case-key", output: "hello", outputs: "ignored" },
+    { name: "expect-key", output: "hello", expect: { requried: "missing" } }
+  ];
+
+  try {
+    for (const [index, diagnostic] of [[0, /Case 1 \(case-key\).*unsupported field "outputs"/], [1, /Case 1 \(expect-key\).*unsupported field "expect.requried"/]]) {
+      assert.throws(() => evaluateCases([cases[index]]), diagnostic);
+      const file = path.join(directory, `unknown-${index}.json`);
+      writeFileSync(file, JSON.stringify([cases[index]]));
+      assert.throws(() => loadCases(file), diagnostic);
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("rejects duplicate case names through both APIs", () => {
+  const cases = [
+    { name: "same", output: "first" },
+    { name: "same", output: "second" }
+  ];
+  const directory = mkdtempSync(path.join(tmpdir(), "prompt-regression-duplicate-"));
+  const file = path.join(directory, "duplicate.json");
+  writeFileSync(file, JSON.stringify(cases));
+
+  try {
+    assert.throws(() => evaluateCases(cases), /Case 2 \(same\).*duplicates Case 1/);
+    assert.throws(() => loadCases(file), /Case 2 \(same\).*duplicates Case 1/);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test("matches built-in tone hints only at token boundaries", () => {
   const report = evaluateCases([
     { name: "substring", output: "This cannot be approved.", expect: { tone: "calm" } },
@@ -142,6 +178,27 @@ test("CLI rejects an empty suite with a diagnostic and nonzero exit", () => {
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /must contain at least one case/);
     assert.equal(result.stdout, "");
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("CLI rejects unsupported keys and duplicate names without stdout", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "prompt-regression-cli-schema-"));
+  const fixtures = [
+    ["unknown.json", [{ name: "typo", output: "ok", expect: { requried: "must exist" } }], /unsupported field "expect.requried"/],
+    ["duplicate.json", [{ name: "same", output: "one" }, { name: "same", output: "two" }], /duplicates Case 1/]
+  ];
+
+  try {
+    for (const [name, contents, diagnostic] of fixtures) {
+      const file = path.join(directory, name);
+      writeFileSync(file, JSON.stringify(contents));
+      const result = spawnSync(process.execPath, ["bin/prompt-regression-skill.js", file, "--format", "json"], { encoding: "utf8" });
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, diagnostic);
+      assert.equal(result.stdout, "");
+    }
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
