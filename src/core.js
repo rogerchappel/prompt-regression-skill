@@ -67,7 +67,16 @@ function normalizeCases(cases) {
   if (cases.length === 0) {
     throw new Error("Regression cases must contain at least one case");
   }
-  return cases.map(normalizeCase);
+  const normalized = cases.map(normalizeCase);
+  const firstIndexes = new Map();
+  for (const [index, item] of normalized.entries()) {
+    const firstIndex = firstIndexes.get(item.name);
+    if (firstIndex !== undefined) {
+      throw new Error(`Case ${index + 1} (${item.name}) duplicates Case ${firstIndex + 1}; case names must be unique`);
+    }
+    firstIndexes.set(item.name, index);
+  }
+  return normalized;
 }
 
 function normalizeCase(item, index) {
@@ -78,6 +87,7 @@ function normalizeCase(item, index) {
   if (typeof item.name !== "string" || item.name.trim() === "") {
     throw new Error(`${label} field "name" must be a non-empty string`);
   }
+  rejectUnsupportedKeys(item, ["name", "output", "expect", "notes"], `${label} (${item.name})`);
   if (typeof item.output !== "string") {
     throw new Error(`${label} (${item.name}) field "output" must be a string`);
   }
@@ -85,6 +95,7 @@ function normalizeCase(item, index) {
     throw new Error(`${label} (${item.name}) field "expect" must be an object`);
   }
   const expect = item.expect ?? {};
+  rejectUnsupportedKeys(expect, ["required", "forbidden", "tone"], `${label} (${item.name})`, "expect.");
   const normalizedExpect = {
     required: asStringArray(expect.required, `${label} (${item.name}) field "expect.required"`),
     forbidden: asStringArray(expect.forbidden, `${label} (${item.name}) field "expect.forbidden"`)
@@ -182,4 +193,11 @@ function optionalString(value, field) {
 
 function isPlainObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function rejectUnsupportedKeys(value, supportedKeys, label, prefix = "") {
+  const unsupported = Object.keys(value).find((key) => !supportedKeys.includes(key));
+  if (unsupported !== undefined) {
+    throw new Error(`${label} has unsupported field "${prefix}${unsupported}"`);
+  }
 }
