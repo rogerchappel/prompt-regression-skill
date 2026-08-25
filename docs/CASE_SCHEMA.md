@@ -5,7 +5,7 @@ array must contain at least one case; an empty regression gate is invalid.
 
 Required fields:
 
-- `name`: non-empty stable case name.
+- `name`: non-empty stable case name that is unique within the file.
 - `output`: saved output to evaluate.
 
 Optional fields:
@@ -21,7 +21,11 @@ Optional fields:
 
 Values are validated rather than coerced. The loader and CLI reject malformed
 containers, empty suites, missing required fields, empty or non-string phrase
-values, and non-string tone or note values. Tone matching is case-insensitive,
+values, non-string tone or note values, and duplicate names. The case schema is
+closed: case objects support only `name`, `output`, `expect`, and `notes`, while
+`expect` supports only `required`, `forbidden`, and `tone`. Unknown keys are
+rejected with their case and field path so misspelled assertions cannot be
+silently ignored. Tone matching is case-insensitive,
 and both built-in and custom hints must match complete Unicode letter, number,
 or underscore-delimited tokens. Thus `can` does not match `cannot`, and the
 custom hint `formal` does not match `informally`; punctuation may delimit a
