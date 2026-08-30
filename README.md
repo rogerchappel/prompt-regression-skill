@@ -19,8 +19,9 @@ Case files accept either a non-empty JSON array or an object with a non-empty
 are rejected rather than ignored. Invalid fields produce a case-specific
 diagnostic and nonzero exit; see
 [`docs/CASE_SCHEMA.md`](docs/CASE_SCHEMA.md) for the validated schema.
-Tone hints match case-insensitively as complete Unicode tokens, including
-custom hints: `formal` matches `FORMAL!`, but not `informally`.
+Tone labels and hints match case-insensitively as complete Unicode tokens.
+Built-in labels such as `calm`, `CALM`, and `CaLm` are equivalent; custom
+hints behave the same way, so `formal` matches `FORMAL!`, but not `informally`.
 
 ```json
 {

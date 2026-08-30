@@ -15,6 +15,8 @@ format and uses semantic versioning when versioned releases are published.
   empty gates to pass or coercing invalid phrase values.
 - Keep omitted optional fields valid across loader and evaluator boundaries,
   reject blank phrase entries, and match built-in tone hints as complete tokens.
+- Normalize built-in and custom tone labels case-insensitively while retaining
+  complete Unicode token-boundary matching.
 
 ### Added
 
