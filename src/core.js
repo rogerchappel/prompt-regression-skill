@@ -157,13 +157,14 @@ function normalize(value) {
 
 function matchesTone(output, tone) {
   const normalized = normalize(output);
+  const normalizedTone = normalize(tone);
   const toneHints = {
     calm: ["thanks", "context", "can", "will", "concise"],
     direct: ["do", "run", "check", "because"],
     cautious: ["may", "verify", "review", "risk"]
   };
-  const hints = toneHints[tone];
-  return (hints || [tone]).some((hint) => containsToken(normalized, normalize(hint)));
+  const hints = toneHints[normalizedTone] || [normalizedTone];
+  return hints.some((hint) => containsToken(normalized, normalize(hint)));
 }
 
 function containsToken(text, token) {
