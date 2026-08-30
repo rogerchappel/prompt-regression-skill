@@ -132,15 +132,29 @@ test("matches built-in tone hints only at token boundaries", () => {
   assert.equal(report.results[1].status, "pass");
 });
 
+test("matches built-in tone labels case-insensitively", () => {
+  const output = "Thanks for the context; we can review this.";
+  const report = evaluateCases(["calm", "CALM", "CaLm"].map((tone) => ({
+    name: tone,
+    output,
+    expect: { tone }
+  })));
+
+  assert.equal(report.status, "pass");
+  assert.deepEqual(report.results.map((result) => result.status), ["pass", "pass", "pass"]);
+});
+
 test("matches custom tone hints only at Unicode token boundaries", () => {
   const report = evaluateCases([
     { name: "substring", output: "We will respond informally.", expect: { tone: "formal" } },
-    { name: "standalone", output: "The requested style is FORMAL, concise.", expect: { tone: "formal" } }
+    { name: "standalone", output: "The requested style is FORMAL, concise.", expect: { tone: "FoRmAl" } },
+    { name: "unicode-boundary", output: "The style is INFORMÁL.", expect: { tone: "formal" } }
   ]);
 
   assert.equal(report.results[0].status, "fail");
   assert.deepEqual(report.results[0].findings, ["tone check needs review: expected formal"]);
   assert.equal(report.results[1].status, "pass");
+  assert.equal(report.results[2].status, "fail");
 });
 
 test("renders json and text reports", () => {
@@ -237,6 +251,26 @@ test("CLI fails when a custom tone occurs only inside a larger token", () => {
     assert.equal(report.status, "fail");
     assert.equal(report.results[0].status, "fail");
     assert.equal(report.results[1].status, "pass");
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("CLI treats built-in tone label casing identically", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "prompt-regression-cli-tone-label-"));
+  const file = path.join(directory, "tone-labels.json");
+  writeFileSync(file, JSON.stringify(["calm", "CALM", "CaLm"].map((tone) => ({
+    name: tone,
+    output: "Thanks for the context; we can review this.",
+    expect: { tone }
+  }))));
+
+  try {
+    const result = spawnSync(process.execPath, ["bin/prompt-regression-skill.js", file, "--format", "json"], {
+      encoding: "utf8"
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.deepEqual(JSON.parse(result.stdout).results.map((item) => item.status), ["pass", "pass", "pass"]);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
