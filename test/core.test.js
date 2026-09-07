@@ -234,6 +234,28 @@ test("CLI evaluates a minimal case without optional fields", () => {
   }
 });
 
+test("README Case Format example is an executable passing fixture", () => {
+  const readme = readFileSync("README.md", "utf8");
+  const caseFormat = readme.match(/## Case Format([\s\S]*?)(?:\n## |$)/);
+  assert.ok(caseFormat, "README must contain a Case Format section");
+  const example = caseFormat[1].match(/```json\s+([\s\S]*?)\s+```/);
+  assert.ok(example, "README Case Format must contain a JSON example");
+
+  const directory = mkdtempSync(path.join(tmpdir(), "prompt-regression-readme-"));
+  const file = path.join(directory, "readme-case.json");
+  writeFileSync(file, example[1]);
+
+  try {
+    const result = spawnSync(process.execPath, ["bin/prompt-regression-skill.js", file, "--format", "json"], {
+      encoding: "utf8"
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(JSON.parse(result.stdout).status, "pass");
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test("CLI fails when a custom tone occurs only inside a larger token", () => {
   const directory = mkdtempSync(path.join(tmpdir(), "prompt-regression-cli-tone-"));
   const file = path.join(directory, "custom-tone.json");
