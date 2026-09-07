@@ -50,8 +50,12 @@ Both supported containers below are equivalent:
   "cases": [
     {
       "name": "support-followup",
-      "output": "Thanks for the context.",
-      "expect": { "required": ["context"] }
+      "output": "Thanks for the context. I will draft a concise follow-up.",
+      "expect": {
+        "required": ["concise follow-up"],
+        "forbidden": ["guarantee"],
+        "tone": "calm"
+      }
     }
   ]
 }

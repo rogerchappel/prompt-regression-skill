@@ -25,13 +25,17 @@ hints behave the same way, so `formal` matches `FORMAL!`, but not `informally`.
 
 ```json
 {
-  "name": "support-followup",
-  "output": "Thanks for the context. I will draft a concise follow-up.",
-  "expect": {
-    "required": ["concise follow-up"],
-    "forbidden": ["guarantee"],
-    "tone": "calm"
-  }
+  "cases": [
+    {
+      "name": "support-followup",
+      "output": "Thanks for the context. I will draft a concise follow-up.",
+      "expect": {
+        "required": ["concise follow-up"],
+        "forbidden": ["guarantee"],
+        "tone": "calm"
+      }
+    }
+  ]
 }
 ```
 
